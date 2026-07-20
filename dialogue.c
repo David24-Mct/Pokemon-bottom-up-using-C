@@ -1,6 +1,11 @@
 #include "dialogue.h"
-#include "npc.h"
+#include "game_state.h"
+#include "raylib.h"
 
+
+// =========================
+// DRAW DIALOGUE BOX
+// =========================
 
 void DrawDialogueBox(
     NPC npc,
@@ -9,61 +14,123 @@ void DrawDialogueBox(
 {
     DrawRectangle(
         50,
-        430,
+        450,
         700,
         120,
         BLACK
     );
 
-
     DrawRectangleLines(
         50,
-        430,
+        450,
         700,
         120,
         WHITE
     );
 
-
     DrawText(
         npc.name,
-        75,
-        455,
+        70,
+        465,
         20,
         YELLOW
     );
 
-
     DrawText(
         npc.dialogue[currentLine],
-        75,
-        490,
-        24,
+        70,
+        500,
+        20,
         WHITE
     );
 
+    DrawText(
+        "Press E to continue",
+        520,
+        540,
+        16,
+        GRAY
+    );
+}
+
+
+// =========================
+// UPDATE DIALOGUE
+// =========================
+
+void UpdateDialogue(
+    GameState *gameState,
+    int *activeNPC,
+    int *currentDialogueLine,
+    Player player,
+    NPC npcs[],
+    int npcCount
+)
+{
+    if (!IsKeyPressed(KEY_E))
+    {
+        return;
+    }
+
+
+    // =========================
+    // START DIALOGUE
+    // =========================
 
     if (
-        currentLine <
-        npc.dialogueLineCount - 1
+        *gameState ==
+        GAME_PLAYING
     )
     {
-        DrawText(
-            "Press E to continue",
-            550,
-            525,
-            16,
-            LIGHTGRAY
-        );
+        int nearbyNPC =
+            FindNearbyNPC(
+                player,
+                npcs,
+                npcCount
+            );
+
+
+        if (
+            nearbyNPC != -1
+        )
+        {
+            *activeNPC =
+                nearbyNPC;
+
+            *currentDialogueLine =
+                0;
+
+            *gameState =
+                GAME_DIALOGUE;
+        }
     }
-    else
+
+
+    // =========================
+    // ADVANCE DIALOGUE
+    // =========================
+
+    else if (
+        *gameState ==
+        GAME_DIALOGUE
+    )
     {
-        DrawText(
-            "Press E to finish",
-            550,
-            525,
-            16,
-            LIGHTGRAY
-        );
+        (*currentDialogueLine)++;
+
+
+        if (
+            *currentDialogueLine >=
+            npcs[*activeNPC].dialogueLineCount
+        )
+        {
+            *gameState =
+                GAME_PLAYING;
+
+            *currentDialogueLine =
+                0;
+
+            *activeNPC =
+                -1;
+        }
     }
 }

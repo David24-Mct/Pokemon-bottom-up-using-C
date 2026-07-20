@@ -1,12 +1,10 @@
+
+#include "game_state.h"
+
 #ifndef DIALOGUE_H
 #define DIALOGUE_H
 
 #include "npc.h"
-
-
-// =========================
-// DIALOGUE STATE
-// =========================
 
 typedef enum
 {
@@ -16,13 +14,19 @@ typedef enum
 } DialogueState;
 
 
-// =========================
-// DRAW DIALOGUE BOX
-// =========================
-
 void DrawDialogueBox(
     NPC npc,
     int currentLine
+);
+
+
+void UpdateDialogue(
+    GameState *gameState,
+    int *activeNPC,
+    int *currentDialogueLine,
+    Player player,
+    NPC npcs[],
+    int npcCount
 );
 
 #endif
