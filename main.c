@@ -10,6 +10,7 @@
 #include "player_data.h"
 #include "game_state.h"
 #include "pause.h"
+#include "menu.h"
 
 
 // =========================
@@ -24,9 +25,12 @@ int main(void)
         "Monster Realms"
     );
 
-
     SetTargetFPS(60);
 
+
+    // =========================
+    // WORLD
+    // =========================
 
     CreateMap();
 
@@ -35,9 +39,10 @@ int main(void)
     // PLAYER
     // =========================
 
-  Player player;
+    Player player;
 
-CreatePlayer(&player);
+    CreatePlayer(&player);
+
 
     // =========================
     // NPCS
@@ -45,40 +50,39 @@ CreatePlayer(&player);
 
     NPC npcs[MAX_NPCS];
 
-
     CreateNPCs(npcs);
 
 
     // =========================
-    // DIALOGUE SYSTEM
+    // GAME STATE
     // =========================
 
-   GameState gameState =
-    GAME_PLAYING;
+    GameState gameState =
+        GAME_MENU;
 
     int currentDialogueLine =
         0;
 
-
     int activeNPC =
         -1;
 
-// =========================
-// CAMERA
-// =========================
 
-Camera2D camera =
-{
-    0
-};
+    // =========================
+    // CAMERA
+    // =========================
 
+    Camera2D camera =
+    {
+        0
+    };
 
-InitializeCamera(
-    &camera,
-    player,
-    SCREEN_WIDTH,
-    SCREEN_HEIGHT
-);
+    InitializeCamera(
+        &camera,
+        player,
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT
+    );
+
 
     // =========================
     // GAME LOOP
@@ -87,27 +91,60 @@ InitializeCamera(
     while (
         !WindowShouldClose()
     )
-
     {
+        // =========================
+        // MAIN MENU
+        // =========================
+
+        if (
+            gameState ==
+            GAME_MENU
+        )
+        {
+            UpdateMenu(
+                &gameState
+            );
+        }
 
 
-     UpdatePauseMenu
-     (
-    &gameState
-);
+        // =========================
+        // PAUSE MENU
+        // =========================
+
+        if (
+            gameState ==
+            GAME_PLAYING ||
+            gameState ==
+            GAME_PAUSED
+        )
+        {
+            UpdatePauseMenu(
+                &gameState
+            );
+        }
+
 
         // =========================
         // DIALOGUE
         // =========================
 
-        UpdateDialogue(
-    &gameState,
-    &activeNPC,
-    &currentDialogueLine,
-    player,
-    npcs,
-    MAX_NPCS
-);
+        if (
+            gameState ==
+            GAME_PLAYING ||
+            gameState ==
+            GAME_DIALOGUE
+        )
+        {
+            UpdateDialogue(
+                &gameState,
+                &activeNPC,
+                &currentDialogueLine,
+                player,
+                npcs,
+                MAX_NPCS
+            );
+        }
+
 
         // =========================
         // PLAYER MOVEMENT
@@ -129,10 +166,18 @@ InitializeCamera(
         // =========================
         // UPDATE CAMERA
         // =========================
-           UpdateGameCamera(
-               &camera,
-               player
+
+        if (
+            gameState !=
+            GAME_MENU
+        )
+        {
+            UpdateGameCamera(
+                &camera,
+                player
             );
+        }
+
 
         // =========================
         // DRAW
@@ -141,46 +186,86 @@ InitializeCamera(
         BeginDrawing();
 
 
-        ClearBackground(BLACK);
-
-
-        BeginMode2D(camera);
-
-
-        DrawMap();
-
-
-        for (
-            int i = 0;
-            i < MAX_NPCS;
-            i++
-        )
-        {
-            DrawNPC(npcs[i]);
-        }
-
-
-        DrawPlayer(player);
-
-
-        EndMode2D();
-
+        // =========================
+        // MAIN MENU
+        // =========================
 
         if (
             gameState ==
-            GAME_DIALOGUE
+            GAME_MENU
         )
         {
-            DrawDialogueBox(
-                npcs[activeNPC],
-                currentDialogueLine
-            );
+            DrawMenu();
         }
 
-        if (gameState == GAME_PAUSED)
-{
-    DrawPauseMenu();
-}
+
+        // =========================
+        // GAME WORLD
+        // =========================
+
+        else
+        {
+            ClearBackground(
+                BLACK
+            );
+
+
+            BeginMode2D(
+                camera
+            );
+
+
+            DrawMap();
+
+
+            for (
+                int i = 0;
+                i < MAX_NPCS;
+                i++
+            )
+            {
+                DrawNPC(
+                    npcs[i]
+                );
+            }
+
+
+            DrawPlayer(
+                player
+            );
+
+
+            EndMode2D();
+
+
+            // =========================
+            // DIALOGUE
+            // =========================
+
+            if (
+                gameState ==
+                GAME_DIALOGUE
+            )
+            {
+                DrawDialogueBox(
+                    npcs[activeNPC],
+                    currentDialogueLine
+                );
+            }
+
+
+            // =========================
+            // PAUSE MENU
+            // =========================
+
+            if (
+                gameState ==
+                GAME_PAUSED
+            )
+            {
+                DrawPauseMenu();
+            }
+        }
 
 
         EndDrawing();

@@ -3,6 +3,7 @@
 
 typedef enum
 {
+    GAME_MENU,
     GAME_PLAYING,
     GAME_DIALOGUE,
     GAME_PAUSED
